@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 import requests
 from bs4 import BeautifulSoup
 import time
@@ -50,30 +51,35 @@ class FreelanceBot:
             offer = self.driver.find_element_by_css_selector(
                 "a[title='Заявка на участие']")
             if offer.text == 'Предложить услуги':
-                href = self.url + offer.get_attribute("href")
-                self.driver.get(href)
+                print ('++', end='')
+                offer.click()
                 cost = self.driver.find_element_by_id('cost')
                 if not cost.get_attribute('value'):
                     cost.send_keys('1')
                 self.driver.find_element_by_id('msg_body').send_keys(self.message)
                 self.driver.find_element_by_xpath(
                     '//*[@id="msg_form"]/input[2]').click()
-                self.submitted_links.append(link)
+                self.submitted_links.append(task['link'])
                 # Success: offer submitted
-                msg = """✓ {title}
-                Заказчик: {client_name}
-                Время публикации: {pubdate}
-                Ссылка: {link}""".format(**task)
+                msg = """+ {title}
+    Заказчик: {client_name}
+    Время публикации: {pubdate}
+    Ссылка: {link}""".format(**task)
                 status = True
             else:
                 # Unsuccess: offer was already submitted
                 msg = """XXX {title}
-                Ссылка: {link}""".format(**task)
+    Ссылка: {link}""".format(**task)
                 status = False
-        except:
+        except NoSuchElementException:
             # Unsuccess: task is closed, submitted or unavaliable
-            msg = """X {title}
-            Ссылка: {link}""".format(**task)
+            msg = """--- {title}
+    Ссылка: {link}""".format(**task)
+            status = False
+        except Exception as e:
+            print (e)
+            msg = """ERR {title}
+    Ссылка: {link}""".format(**task)
             status = False
         return status, msg
 
@@ -117,6 +123,7 @@ class FreelanceBot:
     def write_log(self, msg):
         print (msg, end='\n\n')
         with open(self.log_filename, 'a') as log:
+            log.write(datetime.now().strftime("[%d-%m-%Y %H:%M:%S]"))
             log.write(msg)
             log.write('\n\n')
 
@@ -133,7 +140,8 @@ class FreelanceBot:
                     end='\n\n')
                 for task in tasks:
                     status, msg = self.submit_offer(task)
-                    self.write_log(msg)
+                    if status:
+                        self.write_log(msg)
                 end_time = time.time()
                 process_time = end_time - start_time
                 if process_time < self.time_long:
