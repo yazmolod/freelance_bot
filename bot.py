@@ -10,8 +10,8 @@ import os
 class FreelanceBot:
     def __init__(self):
         # logging
-        self.log_filename = 'offer_log.log'
-        self.write_log('(START TIME: '+datetime.now().strftime("%d-%m-%Y %H:%M:%S")+')')
+        self.log_filename = 'bot.log'
+        self.logging('(START TIME: '+datetime.now().strftime("%d-%m-%Y %H:%M:%S")+')')
 
         p = os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'phantomjs.exe')
@@ -51,7 +51,7 @@ class FreelanceBot:
             offer = self.driver.find_element_by_css_selector(
                 "a[title='Заявка на участие']")
             if offer.text == 'Предложить услуги':
-                print ('++', end='')
+                print ('...')
                 offer.click()
                 cost = self.driver.find_element_by_id('cost')
                 if not cost.get_attribute('value'):
@@ -61,7 +61,7 @@ class FreelanceBot:
                     '//*[@id="msg_form"]/input[2]').click()
                 self.submitted_links.append(task['link'])
                 # Success: offer submitted
-                msg = """+ {title}
+                msg = """+++ {title}
     Заказчик: {client_name}
     Время публикации: {pubdate}
     Ссылка: {link}""".format(**task)
@@ -120,10 +120,10 @@ class FreelanceBot:
             self.last_pubdate = current_pubdate
             return result
 
-    def write_log(self, msg):
+    def logging(self, msg, printing=True, writing=True):
         print (msg, end='\n\n')
         with open(self.log_filename, 'a') as log:
-            log.write(datetime.now().strftime("[%d-%m-%Y %H:%M:%S]"))
+            log.write(datetime.now().strftime("[%d-%m-%Y %H:%M:%S]")+'\n')
             log.write(msg)
             log.write('\n\n')
 
@@ -133,15 +133,17 @@ class FreelanceBot:
             tasks = self.parse_rss()
             if tasks:
                 print ('offering...\n')
-                print ('*'*19, 
+                print ('*'*21, 
                     datetime.now().strftime("[%d-%m-%Y %H:%M:%S]"),
-                    '*'*19,
+                    '*'*21,
                     sep='\n',
                     end='\n\n')
                 for task in tasks:
                     status, msg = self.submit_offer(task)
                     if status:
-                        self.write_log(msg)
+                        self.logging(msg, writing=True)
+                    else:
+                        self.logging(msg, writing=False)
                 end_time = time.time()
                 process_time = end_time - start_time
                 if process_time < self.time_long:
@@ -160,7 +162,7 @@ if __name__ == '__main__':
             f.login()
             f.process()
         except (KeyboardInterrupt, SystemExit):
-            f.write_log('(END TIME: '+datetime.now().strftime("%d-%m-%Y %H:%M:%S")+')')
+            f.logging('(END TIME: '+datetime.now().strftime("%d-%m-%Y %H:%M:%S")+')')
             input()
             break
         # except Exception as e:
@@ -168,5 +170,5 @@ if __name__ == '__main__':
         #         './errors_screens/' + datetime.now().strftime("%d-%m-%Y %H:%M:%S") + '.png')
         #     f.driver.quit()
         #     error_count += 1
-        #     f.write_log('(ERROR: '+datetime.now().strftime("%d-%m-%Y %H:%M:%S")+')')
+        #     f.logging('(ERROR: '+datetime.now().strftime("%d-%m-%Y %H:%M:%S")+')')
         #     print(e)
