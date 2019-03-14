@@ -8,19 +8,12 @@ import os
 
 class FreelanceBot:
     def __init__(self):
-        print('Start working\n')
-
         # logging
-        self.success_file = open('success.txt', 'a')
-        self.success_file.write(
-            datetime.now().strftime("%d-%m-%Y %H:%M:%S") + '\n\n')
-        self.fail_file = open('fail.txt', 'a')
-        self.fail_file.write(datetime.now().strftime(
-            "%d-%m-%Y %H:%M:%S") + '\n\n')
-        self.success_count = 0
-        self.fail_count = 0
+        self.log_filename = 'offer_log.txt'
+        self.write_log('(START TIME: '+datetime.now().strftime("%d-%m-%Y %H:%M:%S")+')')
 
-        p = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'phantomjs.exe')
+        p = os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'phantomjs.exe')
         self.driver = webdriver.PhantomJS(p)
 
         self.url = 'https://freelance.ru'
@@ -34,44 +27,58 @@ class FreelanceBot:
 
         self.welcome_words = ['3d', 'визуализаци', 'печать', 'чертеж', 'stl',
                               'рендер', 'аксонометри', 'визуализатор', 'unity',
-                              'модел', 'python', '3д', 'архитектор', 'юнити',
+                              'модел', '3д', 'архитектор', 'юнити',
                               'zbrush', 'maya', 'revit', 'ревит']
         self.not_welcome_words = ['интерьер',
-                                  'django', 'джанго', 'rest', 'сайт', 'видео', 'json']
+                                  'django', 'джанго', 'rest', 'сайт', 'видео']
 
         self.time_long = 300  # seconds = 5min
         self.last_pubdate = ''
-        self.submitted_guids = []
+        self.submitted_links = []
 
     def login(self):
         self.driver.get(self.url + '/login')
         self.driver.find_element_by_id('login').send_keys(self.lgn)
         self.driver.find_element_by_id('passwd').send_keys(self.passwd)
         self.driver.find_element_by_name('submit').click()
-        print('Login is successful\n')
+        print('login successfully...')
 
-    def submit_offer(self, task_url):
-        self.driver.get(task_url)
+    def submit_offer(self, task):
+        self.driver.get(task['link'])
+        task['client_name'] = self.driver.find_element_by_xpath(r"//div[@class='name']/a").text
         try:
             offer = self.driver.find_element_by_css_selector(
                 "a[title='Заявка на участие']")
-            # offer = self.driver.find_element_by_xpath('//*[@id="discussion_div"]/div[2]/a')
+            if offer.text == 'Предложить услуги':
+                href = self.url + offer.get_attribute("href")
+                self.driver.get(href)
+                cost = self.driver.find_element_by_id('cost')
+                if not cost.get_attribute('value'):
+                    cost.send_keys('1')
+                self.driver.find_element_by_id('msg_body').send_keys(self.message)
+                self.driver.find_element_by_xpath(
+                    '//*[@id="msg_form"]/input[2]').click()
+                self.submitted_links.append(link)
+                # Success: offer submitted
+                msg = """✓ {title}
+                Заказчик: {client_name}
+                Время публикации: {pubdate}
+                Ссылка: {link}""".format(**task)
+                status = True
+            else:
+                # Unsuccess: offer was already submitted
+                msg = """XXX {title}
+                Ссылка: {link}""".format(**task)
+                status = False
         except:
-            print('Fail: task is closed\n')
-            return False
-        if offer.text == 'Предложить услуги':
-            offer.click()
-            cost = self.driver.find_element_by_id('cost')
-            if not cost.get_attribute('value'):
-                cost.send_keys('1')
-            self.driver.find_element_by_id('msg_body').send_keys(self.message)
-            self.driver.find_element_by_xpath(
-                '//*[@id="msg_form"]/input[2]').click()
-            print('Success: offer submitted\n')
-            return True
-        else:
-            print('Unsuccess: offer was already submitted\n')
-            return False
+            # Unsuccess: task is closed, submitted or unavaliable
+            msg = """X {title}
+            Ссылка: {link}""".format(**task)
+            status = False
+        return status, msg
+
+    def is_valid_category(self, category):
+        return True
 
     def is_valid_title(self, title):
         title = title.lower()
@@ -82,52 +89,59 @@ class FreelanceBot:
         return welcome_bool & not_welcome_bool
 
     def parse_rss(self):
+        print ('parse...')
         r = requests.get(self.rss_url)
-        links = []
-        titles = []
+        result = []
         soup = BeautifulSoup(r.content, 'lxml')
-        pubdate = soup.find('pubdate').text
-        if self.last_pubdate == pubdate:
+        current_pubdate = soup.find('pubdate').text
+        if self.last_pubdate == current_pubdate:
             return None
         else:
             for item in soup.find_all('item'):
                 title = item.find('title').text
-                if not self.is_valid_title(title):
-                    continue
-                link = item.find('guid').text
-                if link not in self.submitted_guids:
-                    titles.append(title)
-                    links.append(link)
-                    self.submitted_guids.append(link)
-            self.last_pubdate = pubdate
-            return list(zip(titles, links))
+                description = item.find('description').text
+                pubdate = item.find('pubdate').text
+                link = item.find('guid').text   #link выдает пустую строку
+                category = item.find('category').text
+                if self.is_valid_title(title) and link not in self.submitted_links and self.is_valid_category(category):
+                    result.append({
+                        'title': title,
+                        'link': link,
+                        'description': description,
+                        'pubdate': pubdate,
+                        'category': category,
+                    })
+            self.last_pubdate = current_pubdate
+            return result
+
+    def write_log(self, msg):
+        print (msg, end='\n\n')
+        with open(self.log_filename, 'a') as log:
+            log.write(msg)
+            log.write('\n\n')
 
     def process(self):
         while True:
             start_time = time.time()
             tasks = self.parse_rss()
             if tasks:
+                print ('offering...\n')
+                print ('*'*19, 
+                    datetime.now().strftime("[%d-%m-%Y %H:%M:%S]"),
+                    '*'*19,
+                    sep='\n',
+                    end='\n\n')
                 for task in tasks:
-                    if self.is_valid_title(task[0]):
-                        print(task[0])
-                        print(task[1])
-                        ok = self.submit_offer(task[1])
-                        if ok:
-                            self.success_file.write(
-                                task[0] + '\n' + task[1] + '\n\n')
-                            self.success_count += 1
-                        else:
-                            self.fail_file.write(
-                                task[0] + '\n' + task[1] + '\n\n')
-                            self.fail_count += 1
-            end_time = time.time()
-            process_time = end_time - start_time
-            if process_time < self.time_long:
-                print('Waiting %d seconds for next cycle...' %
-                      (self.time_long - process_time))
-                time.sleep(self.time_long - process_time)
-            print("Ok, it's time for next cycle\n")
-
+                    status, msg = self.submit_offer(task)
+                    self.write_log(msg)
+                end_time = time.time()
+                process_time = end_time - start_time
+                if process_time < self.time_long:
+                    print ('waiting...')
+                    time.sleep(self.time_long - process_time)
+            else:
+                print ('waiting...')
+                time.sleep(self.time_long)
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -138,16 +152,13 @@ if __name__ == '__main__':
             f.login()
             f.process()
         except (KeyboardInterrupt, SystemExit):
-            print("Bot's work is stopped: %d accepted tasks, %d declined tasks. See logs for more information" %
-                  (f.success_count, f.fail_count))
-            f.success_file.close()
-            f.fail_file.close()
+            f.write_log('(END TIME: '+datetime.now().strftime("%d-%m-%Y %H:%M:%S")+')')
             input()
             break
-        except Exception as e:
-            f.driver.save_screenshot(
-                './errors_screens/' + datetime.now().strftime("%d-%m-%Y %H:%M:%S") + '.png')
-            f.driver.quit()
-           # error_count += 1
-            print('Something is wrong')
-            print(e)
+        # except Exception as e:
+        #     f.driver.save_screenshot(
+        #         './errors_screens/' + datetime.now().strftime("%d-%m-%Y %H:%M:%S") + '.png')
+        #     f.driver.quit()
+        #     error_count += 1
+        #     f.write_log('(ERROR: '+datetime.now().strftime("%d-%m-%Y %H:%M:%S")+')')
+        #     print(e)

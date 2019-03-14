@@ -1,0 +1,106 @@
+(START TIME: 14-03-2019 12:01:50)
+
+(START TIME: 14-03-2019 12:07:38)
+
+(START TIME: 14-03-2019 12:14:12)
+
+(START TIME: 14-03-2019 12:14:18)
+
+(START TIME: 14-03-2019 12:14:24)
+
+(START TIME: 14-03-2019 12:14:30)
+
+(START TIME: 14-03-2019 12:17:03)
+
+(START TIME: 14-03-2019 12:17:10)
+
+(START TIME: 14-03-2019 12:17:14)
+
+(START TIME: 14-03-2019 12:17:20)
+
+(START TIME: 14-03-2019 12:17:25)
+
+(START TIME: 14-03-2019 12:18:14)
+
+(START TIME: 14-03-2019 12:18:23)
+
+(END TIME: 14-03-2019 12:18:26)
+
+(START TIME: 14-03-2019 12:21:57)
+
+(ERROR: 14-03-2019 12:22:04)
+
+(START TIME: 14-03-2019 12:22:04)
+
+(ERROR: 14-03-2019 12:22:08)
+
+(START TIME: 14-03-2019 12:22:08)
+
+(END TIME: 14-03-2019 12:22:11)
+
+(START TIME: 14-03-2019 12:23:29)
+
+(ERROR: 14-03-2019 12:23:35)
+
+(START TIME: 14-03-2019 12:23:35)
+
+(START TIME: 14-03-2019 12:28:18)
+
+(ERROR: 14-03-2019 12:29:25)
+
+(START TIME: 14-03-2019 12:29:25)
+
+(END TIME: 14-03-2019 12:29:30)
+
+(START TIME: 14-03-2019 12:30:18)
+
+(ERROR: 14-03-2019 12:30:26)
+
+(START TIME: 14-03-2019 12:30:26)
+
+(END TIME: 14-03-2019 12:30:30)
+
+(START TIME: 14-03-2019 12:31:36)
+
+(ERROR: 14-03-2019 12:31:44)
+
+(START TIME: 14-03-2019 12:31:44)
+
+(ERROR: 14-03-2019 12:31:50)
+
+(START TIME: 14-03-2019 12:31:50)
+
+(ERROR: 14-03-2019 12:31:58)
+
+(START TIME: 14-03-2019 12:31:58)
+
+(ERROR: 14-03-2019 12:32:05)
+
+(START TIME: 14-03-2019 12:32:05)
+
+(ERROR: 14-03-2019 12:32:12)
+
+(START TIME: 14-03-2019 12:32:51)
+
+(ERROR: 14-03-2019 12:33:00)
+
+(START TIME: 14-03-2019 12:33:00)
+
+(START TIME: 14-03-2019 12:34:49)
+
+(START TIME: 14-03-2019 12:36:18)
+
+X Требуется 3D Визуализатор для создания сцен
+                	Ссылка: https://freelance.ru/projects/trebuetsya-3d-vizualizator-dlya-sozdaniya-scen-1064648.html
+
+X На основе готовой программы компьютерного зрения сделать мат модель и добавить много текста уникального с теорией
+                	Ссылка: https://freelance.ru/projects/osnove-gotovoj-programmi-kompyuternogo-zreniya-sdelat-mat-model-1064639.html
+
+(START TIME: 14-03-2019 12:41:17)
+
+X Требуется 3D Визуализатор для создания сцен
+            Ссылка: https://freelance.ru/projects/trebuetsya-3d-vizualizator-dlya-sozdaniya-scen-1064648.html
+
+X На основе готовой программы компьютерного зрения сделать мат модель и добавить много текста уникального с теорией
+            Ссылка: https://freelance.ru/projects/osnove-gotovoj-programmi-kompyuternogo-zreniya-sdelat-mat-model-1064639.html
+
