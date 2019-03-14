@@ -11,7 +11,7 @@ class FreelanceBot:
         print('Start working\n')
 
         # logging
-        self.success_file = open('succes.txt', 'a')
+        self.success_file = open('success.txt', 'a')
         self.success_file.write(
             datetime.now().strftime("%d-%m-%Y %H:%M:%S") + '\n\n')
         self.fail_file = open('fail.txt', 'a')
@@ -20,8 +20,8 @@ class FreelanceBot:
         self.success_count = 0
         self.fail_count = 0
 
-        self.driver = webdriver.Chrome(
-            r'./chromedriver.exe')
+        p = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'phantomjs.exe')
+        self.driver = webdriver.PhantomJS(p)
 
         self.url = 'https://freelance.ru'
         # настройка rss тут
@@ -35,9 +35,9 @@ class FreelanceBot:
         self.welcome_words = ['3d', 'визуализаци', 'печать', 'чертеж', 'stl',
                               'рендер', 'аксонометри', 'визуализатор', 'unity',
                               'модел', 'python', '3д', 'архитектор', 'юнити',
-                              'zbrush', 'maya']
+                              'zbrush', 'maya', 'revit', 'ревит']
         self.not_welcome_words = ['интерьер',
-            'django', 'джанго', 'rest', 'сайт', 'видео', 'json']
+                                  'django', 'джанго', 'rest', 'сайт', 'видео', 'json']
 
         self.time_long = 300  # seconds = 5min
         self.last_pubdate = ''
@@ -53,8 +53,8 @@ class FreelanceBot:
     def submit_offer(self, task_url):
         self.driver.get(task_url)
         try:
-        	offer = self.driver.find_element_by_css_selector(
-        	    "a[title='Заявка на участие']")
+            offer = self.driver.find_element_by_css_selector(
+                "a[title='Заявка на участие']")
             # offer = self.driver.find_element_by_xpath('//*[@id="discussion_div"]/div[2]/a')
         except:
             print('Fail: task is closed\n')
@@ -132,21 +132,22 @@ class FreelanceBot:
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     error_count = 0
-    while error_count<5:
+    while error_count < 5:
         try:
             f = FreelanceBot()
             f.login()
             f.process()
-        except (KeyboardInterrupt,SystemExit):
-            print ("Bot's work is stopped: %d accepted tasks, %d declined tasks. See logs for more information" % 
-                   (f.success_count, f.fail_count))
+        except (KeyboardInterrupt, SystemExit):
+            print("Bot's work is stopped: %d accepted tasks, %d declined tasks. See logs for more information" %
+                  (f.success_count, f.fail_count))
             f.success_file.close()
             f.fail_file.close()
             input()
             break
         except Exception as e:
-            f.driver.save_screenshot('./errors_screens/'+datetime.now().strftime("%d-%m-%Y %H:%M:%S")+'.png')
+            f.driver.save_screenshot(
+                './errors_screens/' + datetime.now().strftime("%d-%m-%Y %H:%M:%S") + '.png')
             f.driver.quit()
            # error_count += 1
-            print ('Something is wrong')
-            print (e)       
+            print('Something is wrong')
+            print(e)
