@@ -9,7 +9,7 @@ import os
 class FreelanceBot:
     def __init__(self):
         # logging
-        self.log_filename = 'offer_log.txt'
+        self.log_filename = 'offer_log.log'
         self.write_log('(START TIME: '+datetime.now().strftime("%d-%m-%Y %H:%M:%S")+')')
 
         p = os.path.join(os.path.dirname(
